@@ -1,4 +1,4 @@
-# BlockTeamsCreation
+# Push ManageEngine Patch Manager Plus Agent
 This script will block the creation of Office 365 groups (and thus Teams) for all users except the security group you specify. Please create the Office 365 Security Group beforehand and enter it when asked after running the script.
 
 ## Requirements

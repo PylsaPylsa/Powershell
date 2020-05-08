@@ -1,0 +1,2 @@
+#Fix Non-Inherited File Permissions
+Script will go through all (**non-empty**) folders recursively and will attempt to apply the security group with permissions as given where they are not (yet) inherited. Maintain `\\?\` path format in `$target` to work around [path length limitations](https://docs.microsoft.com/nl-nl/windows/win32/fileio/naming-a-file?redirectedfrom=MSDN#maximum-path-length-limitation). 

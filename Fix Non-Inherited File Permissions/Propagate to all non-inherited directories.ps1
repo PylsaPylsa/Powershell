@@ -1,7 +1,10 @@
 ﻿cls
-$group = "GG-FS-Afdelingen"
-$domain ='oosterpoort.local'
-$target = "\\?\F:\"
+$group = "Contoso-fileperms-RW"
+$domain ='contoso.local'
+$target = "\\?\D:\"
+$permissions = "Modify"
+
+
 $countTotal = [int]0
 $countApply = [int]0
 
@@ -21,7 +24,7 @@ foreach ($folder in $folders) {
             }
             $countTotal++
             if ($apply -eq $true) {
-                $acl_Rule = new-object System.Security.AccessControl.FileSystemAccessRule ("$domain\$group", "Modify",”ContainerInherit,ObjectInherit”,”None”,”Allow”)
+                $acl_Rule = new-object System.Security.AccessControl.FileSystemAccessRule ("$domain\$group", "$permissions","ContainerInherit,ObjectInherit","None","Allow")
                 $acl.SetAccessRule($ACL_Rule)
                 Write-Host $("    [*] Applying") -ForegroundColor "Green"
                 Set-Acl -Path $folder.FullName -AclObject $acl 
