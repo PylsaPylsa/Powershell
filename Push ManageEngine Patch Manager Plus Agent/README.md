@@ -15,9 +15,9 @@ Wrapper for PsExec to push the ManageEngine Patch Manager Plus agent to all Wind
 5. Save **PushAgent.ps1**.
 6. Right click **PushAgent.ps1** and execute using Powershell.
 7. The script will copy all necessary files to SYSVOL. If these already exist there, you will be prompted to purge or reuse the existing files.
-8. The script will locate all domain-joined Windows Server based hosts in Active Directory and will ask to confirm the discovered list.
+8. The script will locate all domain-joined Windows Server-based hosts in Active Directory and will ask to confirm the discovered list.
    - For environments with multiple domain controllers, please allow some time for SYSVOL replication to take place before continuing with the push.
    - Servers that have _\*xa*_ in their hostname will be added to the list of servers to skip as these are provisioned Citrix servers in our environments. Feel free to modify this filter as you see fit for your own nomenclature.
 9. The script will now start pushing the agent to all servers. Wait for completion.
-10. After pushing has finished, you will be prompted to purge the fils created in SYSVOL. You can accept this if you do not intend to used them again so your SYSVOL will stay nice and clean.
+10. After pushing has finished, you will be prompted to purge the files created in SYSVOL. You can accept this if you do not intend to used them again so your SYSVOL will stay nice and clean.
 11. PsExec does **not work** for the server it is run from. Please install the agent on that server manually.
