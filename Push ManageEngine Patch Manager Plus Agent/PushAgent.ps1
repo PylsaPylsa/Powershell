@@ -4,7 +4,7 @@
 
 $SysvolPath = "\\contoso.local\SYSVOL\contoso.local"
 
-$Organisatie = "Contoso"
+$Organisation = "Contoso"
 
 # ----- Do not modify below -----
 
@@ -14,7 +14,7 @@ Add-Type -AssemblyName PresentationCore,PresentationFramework
 $InstallFile = @"
 @echo off
 
-$($SysvolPath)\ManageEnginePMA\$($Organisatie)_Agent.exe
+$($SysvolPath)\ManageEnginePMA\$($Organisation)_Agent.exe
 
 if %ERRORLEVEL% EQU 0 (
     echo Installed! :-^)

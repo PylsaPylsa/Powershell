@@ -10,7 +10,7 @@ Wrapper for PsExec to push the ManageEngine Patch Manager Plus agent to all Wind
 2. Download [PsExec from Microsoft](https://docs.microsoft.com/en-us/sysinternals/downloads/psexec) and put **PsExec64.exe** directory used in step 1.
 3. In the same directory, create a new directory named **ManageEnginePMA** and copy your agent installer into it.
 4. Edit **PushAgent.ps1**:
-   -  The value of **$Organisatie** has to match the first part of the installer's name (e.g for Contoso_Agent.exe use value "Contoso").
+   -  The value of **$Organisation** has to match the first part of the installer's name (e.g for Contoso_Agent.exe use value "Contoso").
    -  The value of **$Sysvolpath** has to match the full UNC SYSVOL location of the domain you're installing to (e.g. "\\contoso.local\SYSVOL\contoso.local"). We use SYSVOL because every server on the domain automatically has access to this share by default.
 5. Save **PushAgent.ps1**.
 6. Right click **PushAgent.ps1** and execute using Powershell.
