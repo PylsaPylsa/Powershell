@@ -1,7 +1,7 @@
 # PushAgent
 Wrapper voor PsExec om ManageEngine Patch Manager Plus agent te pushen naar alle Windows Servers op het domein. Vanwege de licentievoorwaarden dient PsExec los te worden gedownload vanaf het Microsoft Download Center.
 
-##Instructies
+## Instructies
 1. PushAgent.ps1 in map plaatsen.
 2. Download [PsExec van Microsoft](https://docs.microsoft.com/en-us/sysinternals/downloads/psexec) en plaats PsExec64.exe in dezelfde map.
 3. Maak een nieuwe map aan met de naam ManageEnginePMA in dezelfde map en plaats hierin de Agent-installer.
