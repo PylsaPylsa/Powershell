@@ -1,5 +1,5 @@
 # Push ManageEngine Patch Manager Plus Agent
-Wrapper fot PsExec to push the ManageEngine Patch Manager Plus agent to all Windows Servers on the domain. Due to licence restrictions, please download and add PsExec yourself from the Microsoft Download Center.
+Wrapper for PsExec to push the ManageEngine Patch Manager Plus agent to all Windows Servers on the domain. Due to licence restrictions, please download and add PsExec yourself from the Microsoft Download Center.
 
 ## Prerequisites
 - Domain admin account or account that has sufficient administrative priviliges to do the install.
