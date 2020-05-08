@@ -1,4 +1,4 @@
-# Block Office 365 Teams Creation
+# Push ManageEngine Patch Manager Plus Agent
 Wrapper voor PsExec om ManageEngine Patch Manager Plus agent te pushen naar alle Windows Servers op het domein. Vanwege de licentievoorwaarden dient PsExec los te worden gedownload vanaf het Microsoft Download Center.
 
 ## Instructies
