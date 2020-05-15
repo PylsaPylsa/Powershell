@@ -16,17 +16,17 @@ foreach($DeliveryGroup in $DeliveryGroups){
 
 
     $retXml += "  <result>`n"
-    $retXml += "    <channel>[$($DeliveryGroup.Name)] Aantal machines in maintenance</channel>`n"
+    $retXml += "    <channel>[$($DeliveryGroup.Name)] Machines in maintenance</channel>`n"
     $retXml += "    <value>$($MachinesInMaintenance.Count)</value>`n"
     $retXml += "  </result>`n"
 
     $retXml += "  <result>`n"
-    $retXml += "    <channel>[$($DeliveryGroup.Name)] Aantal machines uitgeschakeld</channel>`n"
+    $retXml += "    <channel>[$($DeliveryGroup.Name)] Machines powered off</channel>`n"
     $retXml += "    <value>$($MachinesPoweredOff.Count)</value>`n"
     $retXml += "  </result>`n"
 
     $retXml += "  <result>`n"
-    $retXml += "    <channel>[$($DeliveryGroup.Name)] Aantal machines unregistered</channel>`n"
+    $retXml += "    <channel>[$($DeliveryGroup.Name)] Machines unregistered</channel>`n"
     $retXml += "    <value>$($MachinesUnregistered.Count)</value>`n"
     $retXml += "  </result>`n"
 
