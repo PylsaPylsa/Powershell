@@ -79,7 +79,7 @@ function Fill-Sessions($HostPool)
     }
 
     $SessionTotal = $UserSessions.Count
-    $lbSessionCount.Text = "Session count: $SessionTotal (Active: $($($UserSessions | Where-Object {$_.SessionState -eq "Active"}).Count))"
+    $lbSessionCount.Text = "Session count: $SessionTotal (Inactive: $($($UserSessions | Where-Object {$_.SessionState -ne "Active"}).Count))"
     $lbSessionCount.Refresh()
 
     return $UserSessions
@@ -203,7 +203,7 @@ $dgvHostPoolProperties.ReadOnly = $true
 $dgvHostPoolProperties.ColumnCount = 2
 $dgvHostPoolProperties.ColumnHeadersVisible = $true
 $dgvHostPoolProperties.Columns[0].Name = "Property"
-$dgvHostPoolProperties.Columns[0].Name = "Value"
+$dgvHostPoolProperties.Columns[1].Name = "Value"
 
 #
 # tvPools
