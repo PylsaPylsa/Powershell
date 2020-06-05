@@ -511,7 +511,7 @@ $lbabout.Location = New-Object System.Drawing.Point(34, 28)
 $lbabout.Name = "lbabout"
 $lbabout.Size = New-Object System.Drawing.Size(35, 13)
 $lbabout.TabIndex = 0
-$lbabout.Text = "By Tom Schoen`nVersion 0.1"
+$lbabout.Text = "By Tom Schoen`nVersion 0.2"
 
 #
 # Main
