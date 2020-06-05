@@ -87,7 +87,8 @@ function Fill-Sessions($HostPool)
 
 function Fill-HostPoolProperties($Hostpool){
     $HostpoolProperties = Get-RdsHostpool -TenantName $Tenant -HostPoolName $HostPool
-
+    
+    $dgvHostPoolProperties.Rows.Clear()
     $dgvHostPoolProperties.Rows.Add("Tenant Name",$HostpoolProperties.TenantName) | Out-Null
     $dgvHostPoolProperties.Rows.Add("Tenant Group Name",$HostpoolProperties.TenantGroupName) | Out-Null
     $dgvHostPoolProperties.Rows.Add("Host Pool Name",$HostpoolProperties.HostPoolName) | Out-Null
