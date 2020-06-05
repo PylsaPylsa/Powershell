@@ -4,12 +4,12 @@ Add-Type -AssemblyName System.Drawing | Out-Null
 Add-Type -AssemblyName Microsoft.VisualBasic | Out-Null
 
 While($Null -eq $Tenant){
-    $Tenant = [Microsoft.VisualBasic.Interaction]::InputBox("Enter Tenant Name", "Tenant Selection")
+    $Tenant = [Microsoft.VisualBasic.Interaction]::InputBox("Enter RDS Tenant Name", "Tenant Selection")
 }
 
 Install-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
 Import-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
-#$RdsAccount = Add-RdsAccount -DeploymentUrl https://rdbroker.wvd.microsoft.com
+$RdsAccount = Add-RdsAccount -DeploymentUrl https://rdbroker.wvd.microsoft.com
 
 function Update-AppStatus($text){
     $lbAppStatus.Text = $text
