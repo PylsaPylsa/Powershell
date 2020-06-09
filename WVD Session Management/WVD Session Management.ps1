@@ -156,7 +156,7 @@ $dgvSessions.Columns[0].Name = "Username"
 $dgvSessions.Columns[1].Name = "Session ID"
 $dgvSessions.Columns[2].Name = "Hostpool"
 $dgvSessions.Columns[3].Name = "Session host"
-$dgvSessions.Columns[4].Name = "Logon Time"
+$dgvSessions.Columns[4].Name = "Logon time"
 $dgvSessions.Columns[5].Name = "Status"
 
 #
@@ -179,11 +179,11 @@ $dgvHosts.ColumnCount = 7
 $dgvHosts.ColumnHeadersVisible = $true
 $dgvHosts.Columns[0].Name = "Hostname"
 $dgvHosts.Columns[1].Name = "Internal IP"
-$dgvHosts.Columns[2].Name = "Last Heartbeat"
+$dgvHosts.Columns[2].Name = "Last heartbeat"
 $dgvHosts.Columns[3].Name = "Pingable internal"
 $dgvHosts.Columns[4].Name = "Status"
 $dgvHosts.Columns[5].Name = "Allow new sessions"
-$dgvHosts.Columns[6].Name = "Session Count"
+$dgvHosts.Columns[6].Name = "Session count"
 
 $dgvHosts.Add_CellMouseClick({
     if($dgvHosts.SelectedRows[0].Cells[5].Value -eq "True"){
@@ -315,7 +315,7 @@ $btSendMessage.Location = New-Object System.Drawing.Point(762, 620)
 $btSendMessage.Name = "btSendMessage"
 $btSendMessage.Size = New-Object System.Drawing.Size(111, 23)
 $btSendMessage.TabIndex = 4
-$btSendMessage.Text = "Send Message"
+$btSendMessage.Text = "Send message"
 $btSendMessage.UseVisualStyleBackColor = $true
 $btSendMessage.Enabled = $false
 
