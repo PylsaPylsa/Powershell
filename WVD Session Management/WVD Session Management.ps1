@@ -7,9 +7,15 @@ While($Null -eq $Tenant){
     $Tenant = [Microsoft.VisualBasic.Interaction]::InputBox("Enter RDS Tenant Name", "Tenant Selection")
 }
 
-Install-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
+if (!(Get-Module "Microsoft.RDInfra.RDPowerShell")) {
+    Install-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
+}
+
 Import-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
 $RdsAccount = Add-RdsAccount -DeploymentUrl https://rdbroker.wvd.microsoft.com
+
+$strCurrentTimeZone = (Get-WmiObject win32_timezone).StandardName
+$objTimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
 
 function Update-AppStatus($text){
     $lbAppStatus.Text = $text
@@ -38,7 +44,7 @@ function Fill-SessionHosts($HostPool)
             }
         }
         $SessionHostName = $_.SessionHostName
-        $rowIndex = $dgvHosts.Rows.Add($SessionHostName,$SessionHostInternalIP,$_.LastHeartBeat,$SessionHostInternalPingable,$_.Status,$_.AllowNewSession,"$($($UserSessions | Where-Object {$_.SessionHostName -eq $SessionHostName}).Count)$MaxSessionLimit")
+        $rowIndex = $dgvHosts.Rows.Add($SessionHostName,$SessionHostInternalIP,[System.TimeZoneInfo]::ConvertTimeFromUtc($_.LastHeartBeat, $objTimeZone),$SessionHostInternalPingable,$_.Status,$_.AllowNewSession,"$($($UserSessions | Where-Object {$_.SessionHostName -eq $SessionHostName}).Count)$MaxSessionLimit")
 
         if(-not $_.AllowNewSession){
             $dgvHosts.Rows[$rowIndex].Cells[5].Style.ForeColor=[System.Drawing.Color]::FromArgb(255,204,0,0)
@@ -75,7 +81,7 @@ function Fill-Sessions($HostPool)
     $dgvSessions.Rows.Clear()
     $UserSessions = Get-RdsUserSession -TenantName $Tenant -HostPoolName $HostPool 
     $UserSessions | foreach{
-        $dgvSessions.Rows.Add($_.AdUserName,$_.SessionId,$_.HostPoolName,$_.SessionHostName,$_.CreateTime,$_.SessionState) | Out-Null
+        $dgvSessions.Rows.Add($_.AdUserName,$_.SessionId,$_.HostPoolName,$_.SessionHostName,[System.TimeZoneInfo]::ConvertTimeFromUtc($_.CreateTime, $objTimeZone),$_.SessionState) | Out-Null
     }
 
     $SessionTotal = $UserSessions.Count
@@ -123,6 +129,10 @@ $lbAppStatus = New-Object System.Windows.Forms.Label
 $lbabout = New-Object System.Windows.Forms.Label
 $tabHostpool = New-Object System.Windows.Forms.TabPage
 $dgvHostPoolProperties = New-Object System.Windows.Forms.DataGridView
+$btRestartHost = New-Object System.Windows.Forms.Button
+$btDirectRDP = New-Object System.Windows.Forms.Button
+$btExportCSVHosts = New-Object System.Windows.Forms.Button
+$btExportCSVSessions = New-Object System.Windows.Forms.Button
 
 #
 # dgvSessions
@@ -228,15 +238,20 @@ $tvPools.ExpandAll();
 $tvPools.add_AfterSelect({
     if($this.SelectedNode.Text -ne $Tenant){
         Update-AppStatus("Fetching sessions from $($this.SelectedNode.Text)")
-        $UserSessionsRet = Fill-Sessions($this.SelectedNode.Text)
+        $global:UserSessionsRet = Fill-Sessions($this.SelectedNode.Text)
         $btRefreshSessions.Enabled = $true
         $btShadow.Enabled = $true
         $btLogoff.Enabled = $true
         $btSendMessage.Enabled = $true
+        $btExportCSVSessions.Enabled = $true
 
         Update-AppStatus("Fetching hosts from $($this.SelectedNode.Text)")
-        $SessionHostsRet = Fill-SessionHosts($this.SelectedNode.Text)
+        $global:SessionHostsRet = Fill-SessionHosts($this.SelectedNode.Text)
         $btRefreshHosts.Enabled = $true
+        $btExportCSVHosts.Enabled = $true
+        $btDirectRDP.Enabled = $true
+        $btRestartHost.Enabled = $true
+
 
         Update-AppStatus("Fetching host pool properties from $($this.SelectedNode.Text)")
         Fill-HostPoolProperties($this.SelectedNode.Text)
@@ -278,15 +293,16 @@ $btLogoff.Add_Click({
     $LogoffSessionID = $dgvSessions.SelectedRows[0].Cells[1].Value
     $LogoffSessionUser = $dgvSessions.SelectedRows[0].Cells[0].Value
     $LogoffSessionHost = $dgvSessions.SelectedRows[0].Cells[3].Value
-    #$LogoffSessionHostIP = $(Resolve-DnsName -Name $LogoffSessionHost -Type A)[0].IPAddress
     $Confirm = [System.Windows.MessageBox]::Show("Log off $($LogoffSessionUser)?",'Log off','YesNo','Warning')
     if($Confirm -eq "Yes"){
         Update-AppStatus("Logging off $LogoffSessionUser")
         Invoke-RdsUserSessionLogoff -TenantName $Tenant -HostPoolName $tvPools.SelectedNode.Text -SessionHostName $LogoffSessionHost -SessionId $LogoffSessionID -NoUserPrompt
-        #Start-Process "$env:windir\system32\logoff.exe" -ArgumentList "$LogoffSessionID /server:$LogoffSessionHostIP"
+        #Start-Process "$env:windir\system32\logoff.exe" -ArgumentList "$LogoffSessionID /server:$LogoffSessionHost"
+
+        Start-Sleep -Seconds 1.5
 
         Update-AppStatus("Fetching sessions from $($tvPools.SelectedNode.Text)")
-        $UserSessionsRet = Fill-Sessions($tvPools.SelectedNode.Text)
+        $global:UserSessionsRet = Fill-Sessions($tvPools.SelectedNode.Text)
 
         Update-AppStatus("Connected to $($tvPools.SelectedNode.Text)")
     }
@@ -319,19 +335,90 @@ $btSendMessage.Add_Click({
 })
 
 #
-# lbSessionCount
+# btRestartHost
 #
-$lbSessionCount.AutoSize = $true
-$lbSessionCount.Location = New-Object System.Drawing.Point(6, 625)
-$lbSessionCount.Name = "lbSessionCount"
-$lbSessionCount.Size = New-Object System.Drawing.Size(86, 13)
-$lbSessionCount.TabIndex = 6
-$lbSessionCount.Text = "Session count: 0"
+$btRestartHost.Location = New-Object System.Drawing.Point(734, 620)
+$btRestartHost.Name = "btRestartHost"
+$btRestartHost.Size = New-Object System.Drawing.Size(93, 23)
+$btRestartHost.TabIndex = 9
+$btRestartHost.Text = "Restart host"
+$btRestartHost.UseVisualStyleBackColor = $true
+$btRestartHost.Enabled = $false
+
+$btRestartHost.Add_Click({
+
+    $RestartHost = $dgvHosts.SelectedRows[0].Cells[0].Value
+    $RestartHostSessions = $dgvHosts.SelectedRows[0].Cells[6].Value
+    $Confirm = [System.Windows.MessageBox]::Show("Restart $($RestartHost)? There are currently $RestartHostSessions users logged onto this host.",'Log off','YesNo','Warning')
+    if($Confirm -eq "Yes"){
+        Update-AppStatus("Restarting $RestartHost")
+        
+        Restart-Computer -ComputerName $RestartHost -Force
+
+        Update-AppStatus("Connected to $($tvPools.SelectedNode.Text)")
+    }
+})
+
+#
+# btDirectRDP
+#
+$btDirectRDP.Location = New-Object System.Drawing.Point(641, 620)
+$btDirectRDP.Name = "btDirectRDP"
+$btDirectRDP.Size = New-Object System.Drawing.Size(87, 23)
+$btDirectRDP.TabIndex = 10
+$btDirectRDP.Text = "Direct RDP"
+$btDirectRDP.UseVisualStyleBackColor = $true
+$btDirectRDP.Enabled = $false
+
+$btDirectRDP.Add_Click({
+    $DirectRDPHost = $dgvHosts.SelectedRows[0].Cells[0].Value
+    Start-Process "$env:windir\system32\mstsc.exe" -ArgumentList "/v:$DirectRDPHost /admin"
+})
+
+#
+# btExportCSVHosts
+#
+$btExportCSVHosts.Location = New-Object System.Drawing.Point(535, 620)
+$btExportCSVHosts.Name = "btExportCSVHosts"
+$btExportCSVHosts.Size = New-Object System.Drawing.Size(100, 23)
+$btExportCSVHosts.TabIndex = 11
+$btExportCSVHosts.Text = "Export to CSV"
+$btExportCSVHosts.UseVisualStyleBackColor = $true
+$btExportCSVHosts.Enabled = $false
+
+$btExportCSVHosts.Add_Click({
+    $saveAs = New-Object System.Windows.Forms.SaveFileDialog
+    $saveAs.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*"
+
+    if($saveAs.ShowDialog() -eq 'Ok'){
+        $global:SessionHostsRet | Export-Csv -Path $($saveAs.filename) -NoTypeInformation
+    }
+})
+
+#
+# btExportCSVSessions
+#
+$btExportCSVSessions.Location = New-Object System.Drawing.Point(656, 620)
+$btExportCSVSessions.Name = "btExportCSVSessions"
+$btExportCSVSessions.Size = New-Object System.Drawing.Size(100, 23)
+$btExportCSVSessions.TabIndex = 8
+$btExportCSVSessions.Text = "Export to CSV"
+$btExportCSVSessions.UseVisualStyleBackColor = $true
+$btExportCSVSessions.Enabled = $false
+
+$btExportCSVSessions.Add_Click({
+    $saveAs = New-Object System.Windows.Forms.SaveFileDialog
+    $saveAs.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*"
+
+    if($saveAs.ShowDialog() -eq 'Ok'){
+        $global:UserSessionsRet | Export-Csv -Path $($saveAs.filename) -NoTypeInformation
+    }
+})
 
 #
 # btRefreshSessions
 #
-$btRefreshSessions.Location = New-Object System.Drawing.Point(681, 620)
+$btRefreshSessions.Location = New-Object System.Drawing.Point(575, 620)
 $btRefreshSessions.Name = "btRefreshSessions"
 $btRefreshSessions.Size = New-Object System.Drawing.Size(75, 23)
 $btRefreshSessions.TabIndex = 7
@@ -341,84 +428,13 @@ $btRefreshSessions.Enabled = $false
 
 $btRefreshSessions.Add_Click({
    Update-AppStatus("Fetching sessions from $($tvPools.SelectedNode.Text)")
-   $UserSessionsRet = Fill-Sessions($tvPools.SelectedNode.Text)
-   $SessionTotal = $UserSessionsRet.Count
-   $lbSessionCount.Text = "Session count: $SessionTotal (Active: $($($UserSessionsRet | Where-Object {$_.SessionState -eq "Active"}).Count))"
+   $global:UserSessionsRet = Fill-Sessions($tvPools.SelectedNode.Text)
+   $SessionTotal = $global:UserSessionsRet.Count
+   $lbSessionCount.Text = "Session count: $SessionTotal (Active: $($($global:UserSessionsRet | Where-Object {$_.SessionState -eq "Active"}).Count))"
    $lbSessionCount.Refresh()
 
    Update-AppStatus("Connected to $($tvPools.SelectedNode.Text)")
 })
-
-#
-# tabControl
-#
-$tabControl.Controls.Add($tabSessions)
-$tabControl.Controls.Add($tabHosts)
-$tabControl.Controls.Add($tabHostpool)
-$tabControl.Controls.Add($tabAbout)
-$tabControl.Location = New-Object System.Drawing.Point(252, 12)
-$tabControl.Name = "tabControl"
-$tabControl.SelectedIndex = 0
-$tabControl.Size = New-Object System.Drawing.Size(1050, 675)
-$tabControl.TabIndex = 9
-
-#
-# tabSessions
-#
-$tabSessions.Controls.Add($btRefreshSessions)
-$tabSessions.Controls.Add($lbSessionCount)
-$tabSessions.Controls.Add($btSendMessage)
-$tabSessions.Controls.Add($btLogoff)
-$tabSessions.Controls.Add($btShadow)
-$tabSessions.Controls.Add($dgvSessions)
-$tabSessions.Location = New-Object System.Drawing.Point(4, 22)
-$tabSessions.Name = "tabSessions"
-$tabSessions.Padding = New-Object System.Windows.Forms.Padding(3)
-$tabSessions.Size = New-Object System.Drawing.Size(1042, 649)
-$tabSessions.TabIndex = 0
-$tabSessions.Text = "Sessions"
-$tabSessions.UseVisualStyleBackColor = $true
-
-#
-# tabHosts
-#
-$tabHosts.Controls.Add($lbHostCount)
-$tabHosts.Controls.Add($btRefreshHosts)
-$tabHosts.Controls.Add($btDrainOff)
-$tabHosts.Controls.Add($btDrainOn)
-$tabHosts.Controls.Add($dgvHosts)
-$tabHosts.Location = New-Object System.Drawing.Point(4, 22)
-$tabHosts.Name = "tabHosts"
-$tabHosts.Padding = New-Object System.Windows.Forms.Padding(3)
-$tabHosts.Size = New-Object System.Drawing.Size(1042, 649)
-$tabHosts.TabIndex = 1
-$tabHosts.Text = "Hosts"
-$tabHosts.UseVisualStyleBackColor = $true
-
-#
-# tabHostpool
-#
-$tabHostpool.Controls.Add($dgvHostPoolProperties)
-$tabHostpool.Location = New-Object System.Drawing.Point(4, 22)
-$tabHostpool.Name = "tabHostpool"
-$tabHostpool.Padding = New-Object System.Windows.Forms.Padding(3)
-$tabHostpool.Size = New-Object System.Drawing.Size(1042, 649)
-$tabHostpool.TabIndex = 3
-$tabHostpool.Text = "Host Pool Information"
-$tabHostpool.UseVisualStyleBackColor = $true
-
-#
-# tabAbout
-#
-$tabAbout.Controls.Add($lbabout)
-$tabAbout.Location = New-Object System.Drawing.Point(4, 22)
-$tabAbout.Name = "tabAbout"
-$tabAbout.Padding = New-Object System.Windows.Forms.Padding(3)
-$tabAbout.Size = New-Object System.Drawing.Size(1042, 649)
-$tabAbout.TabIndex = 2
-$tabAbout.Text = "About"
-$tabAbout.UseVisualStyleBackColor = $true
-
 
 #
 # btDrainOn
@@ -467,7 +483,7 @@ $btDrainOff.Add_Click({
 #
 # btRefreshHosts
 #
-$btRefreshHosts.Location = New-Object System.Drawing.Point(752, 620)
+$btRefreshHosts.Location = New-Object System.Drawing.Point(454, 620)
 $btRefreshHosts.Name = "btRefreshHosts"
 $btRefreshHosts.Size = New-Object System.Drawing.Size(75, 23)
 $btRefreshHosts.TabIndex = 3
@@ -477,9 +493,83 @@ $btRefreshHosts.Enabled = $false
 
 $btRefreshHosts.Add_Click({
    Update-AppStatus("Fetching hosts from $($tvPools.SelectedNode.Text)")
-   $SessionHostsRet = Fill-SessionHosts($tvPools.SelectedNode.Text)
+   $global:SessionHostsRet = Fill-SessionHosts($tvPools.SelectedNode.Text)
    Update-AppStatus("Connected to $($tvPools.SelectedNode.Text)")
 })
+
+#
+# tabControl
+#
+$tabControl.Controls.Add($tabSessions)
+$tabControl.Controls.Add($tabHosts)
+$tabControl.Controls.Add($tabHostpool)
+$tabControl.Controls.Add($tabAbout)
+$tabControl.Location = New-Object System.Drawing.Point(252, 12)
+$tabControl.Name = "tabControl"
+$tabControl.SelectedIndex = 0
+$tabControl.Size = New-Object System.Drawing.Size(1050, 675)
+$tabControl.TabIndex = 9
+
+#
+# tabSessions
+#
+$tabSessions.Controls.Add($btExportCSVSessions)
+$tabSessions.Controls.Add($btRefreshSessions)
+$tabSessions.Controls.Add($lbSessionCount)
+$tabSessions.Controls.Add($btSendMessage)
+$tabSessions.Controls.Add($btLogoff)
+$tabSessions.Controls.Add($btShadow)
+$tabSessions.Controls.Add($dgvSessions)
+$tabSessions.Location = New-Object System.Drawing.Point(4, 22)
+$tabSessions.Name = "tabSessions"
+$tabSessions.Padding = New-Object System.Windows.Forms.Padding(3)
+$tabSessions.Size = New-Object System.Drawing.Size(1042, 649)
+$tabSessions.TabIndex = 0
+$tabSessions.Text = "Sessions"
+$tabSessions.UseVisualStyleBackColor = $true
+
+#
+# tabHosts
+#
+$tabHosts.Controls.Add($btExportCSVHosts)
+$tabHosts.Controls.Add($btDirectRDP)
+$tabHosts.Controls.Add($btRestartHost)
+$tabHosts.Controls.Add($lbHostCount)
+$tabHosts.Controls.Add($btRefreshHosts)
+$tabHosts.Controls.Add($btDrainOff)
+$tabHosts.Controls.Add($btDrainOn)
+$tabHosts.Controls.Add($dgvHosts)
+$tabHosts.Location = New-Object System.Drawing.Point(4, 22)
+$tabHosts.Name = "tabHosts"
+$tabHosts.Padding = New-Object System.Windows.Forms.Padding(3)
+$tabHosts.Size = New-Object System.Drawing.Size(1042, 649)
+$tabHosts.TabIndex = 1
+$tabHosts.Text = "Hosts"
+$tabHosts.UseVisualStyleBackColor = $true
+
+#
+# tabHostpool
+#
+$tabHostpool.Controls.Add($dgvHostPoolProperties)
+$tabHostpool.Location = New-Object System.Drawing.Point(4, 22)
+$tabHostpool.Name = "tabHostpool"
+$tabHostpool.Padding = New-Object System.Windows.Forms.Padding(3)
+$tabHostpool.Size = New-Object System.Drawing.Size(1042, 649)
+$tabHostpool.TabIndex = 3
+$tabHostpool.Text = "Host Pool Information"
+$tabHostpool.UseVisualStyleBackColor = $true
+
+#
+# tabAbout
+#
+$tabAbout.Controls.Add($lbabout)
+$tabAbout.Location = New-Object System.Drawing.Point(4, 22)
+$tabAbout.Name = "tabAbout"
+$tabAbout.Padding = New-Object System.Windows.Forms.Padding(3)
+$tabAbout.Size = New-Object System.Drawing.Size(1042, 649)
+$tabAbout.TabIndex = 2
+$tabAbout.Text = "About"
+$tabAbout.UseVisualStyleBackColor = $true
 
 #
 # lbHostCount
@@ -512,7 +602,17 @@ $lbabout.Location = New-Object System.Drawing.Point(34, 28)
 $lbabout.Name = "lbabout"
 $lbabout.Size = New-Object System.Drawing.Size(35, 13)
 $lbabout.TabIndex = 0
-$lbabout.Text = "By Tom Schoen`nVersion 0.2"
+$lbabout.Text = "By Tom Schoen`nVersion 0.3"
+
+#
+# lbSessionCount
+#
+$lbSessionCount.AutoSize = $true
+$lbSessionCount.Location = New-Object System.Drawing.Point(6, 625)
+$lbSessionCount.Name = "lbSessionCount"
+$lbSessionCount.Size = New-Object System.Drawing.Size(86, 13)
+$lbSessionCount.TabIndex = 6
+$lbSessionCount.Text = "Session count: 0"
 
 #
 # Main
