@@ -7,12 +7,17 @@ While($Null -eq $Tenant){
     $Tenant = [Microsoft.VisualBasic.Interaction]::InputBox("Enter RDS Tenant Name", "Tenant Selection")
 }
 
-if (!(Get-Module "Microsoft.RDInfra.RDPowerShell")) {
+if(!(Get-Module "Microsoft.RDInfra.RDPowerShell")) {
     Install-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
 }
 
-Import-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
-$RdsAccount = Add-RdsAccount -DeploymentUrl https://rdbroker.wvd.microsoft.com
+if(!(Get-module Microsoft.RDInfra.RDPowerShell)){
+    Import-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
+}
+
+if($null -eq $RdsAccount){
+    $RdsAccount = Add-RdsAccount -DeploymentUrl https://rdbroker.wvd.microsoft.com
+}
 
 $strCurrentTimeZone = (Get-WmiObject win32_timezone).StandardName
 $objTimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
@@ -109,6 +114,7 @@ function Fill-HostPoolProperties($Hostpool){
 
 $Main = New-Object System.Windows.Forms.Form
 
+$components = New-Object System.ComponentModel.Container
 $dgvSessions = New-Object System.Windows.Forms.DataGridView
 $tvPools = New-Object System.Windows.Forms.TreeView
 $btShadow = New-Object System.Windows.Forms.Button
@@ -118,21 +124,26 @@ $lbSessionCount = New-Object System.Windows.Forms.Label
 $btRefreshSessions = New-Object System.Windows.Forms.Button
 $tabControl = New-Object System.Windows.Forms.TabControl
 $tabSessions = New-Object System.Windows.Forms.TabPage
+$btExportCSVSessions = New-Object System.Windows.Forms.Button
 $tabHosts = New-Object System.Windows.Forms.TabPage
-$tabAbout = New-Object System.Windows.Forms.TabPage
-$dgvHosts = New-Object System.Windows.Forms.DataGridView
-$btDrainOn = New-Object System.Windows.Forms.Button
-$btDrainOff = New-Object System.Windows.Forms.Button
-$btRefreshHosts = New-Object System.Windows.Forms.Button
+$btExportCSVHosts = New-Object System.Windows.Forms.Button
+$btDirectRDP = New-Object System.Windows.Forms.Button
+$btRestartHost = New-Object System.Windows.Forms.Button
 $lbHostCount = New-Object System.Windows.Forms.Label
-$lbAppStatus = New-Object System.Windows.Forms.Label
-$lbabout = New-Object System.Windows.Forms.Label
+$btRefreshHosts = New-Object System.Windows.Forms.Button
+$btDrainOff = New-Object System.Windows.Forms.Button
+$btDrainOn = New-Object System.Windows.Forms.Button
+$dgvHosts = New-Object System.Windows.Forms.DataGridView
 $tabHostpool = New-Object System.Windows.Forms.TabPage
 $dgvHostPoolProperties = New-Object System.Windows.Forms.DataGridView
-$btRestartHost = New-Object System.Windows.Forms.Button
-$btDirectRDP = New-Object System.Windows.Forms.Button
-$btExportCSVHosts = New-Object System.Windows.Forms.Button
-$btExportCSVSessions = New-Object System.Windows.Forms.Button
+$tabAbout = New-Object System.Windows.Forms.TabPage
+$lbAbout = New-Object System.Windows.Forms.Label
+$lbAppStatus = New-Object System.Windows.Forms.Label
+$btOpenShare = New-Object System.Windows.Forms.Button
+$cmsOpenShare = New-Object System.Windows.Forms.ContextMenuStrip($components)
+$tsmiOpenShareC = New-Object System.Windows.Forms.ToolStripMenuItem
+$tsmiOpenShareCUsers = New-Object System.Windows.Forms.ToolStripMenuItem
+$tsmiOpenFSLogixLogs = New-Object System.Windows.Forms.ToolStripMenuItem
 
 #
 # dgvSessions
@@ -251,6 +262,7 @@ $tvPools.add_AfterSelect({
         $btExportCSVHosts.Enabled = $true
         $btDirectRDP.Enabled = $true
         $btRestartHost.Enabled = $true
+        $btOpenshare.Enabled = $true
 
 
         Update-AppStatus("Fetching host pool properties from $($this.SelectedNode.Text)")
@@ -483,7 +495,7 @@ $btDrainOff.Add_Click({
 #
 # btRefreshHosts
 #
-$btRefreshHosts.Location = New-Object System.Drawing.Point(454, 620)
+$btRefreshHosts.Location = New-Object System.Drawing.Point(360, 620)
 $btRefreshHosts.Name = "btRefreshHosts"
 $btRefreshHosts.Size = New-Object System.Drawing.Size(75, 23)
 $btRefreshHosts.TabIndex = 3
@@ -495,6 +507,22 @@ $btRefreshHosts.Add_Click({
    Update-AppStatus("Fetching hosts from $($tvPools.SelectedNode.Text)")
    $global:SessionHostsRet = Fill-SessionHosts($tvPools.SelectedNode.Text)
    Update-AppStatus("Connected to $($tvPools.SelectedNode.Text)")
+})
+
+#
+# btOpenShare
+#
+$btOpenShare.Location = New-Object System.Drawing.Point(441, 620)
+$btOpenShare.Name = "btOpenShare"
+$btOpenShare.Size = New-Object System.Drawing.Size(88, 23)
+$btOpenShare.TabIndex = 12
+$btOpenShare.Text = "Open share"
+$btOpenShare.UseVisualStyleBackColor = $true
+$btOpenshare.Enabled = $false
+
+
+$btOpenShare.Add_Click({
+    $cmsOpenShare.Show($btOpenShare, $(New-Object System.Drawing.Point(0, -50)))
 })
 
 #
@@ -531,6 +559,7 @@ $tabSessions.UseVisualStyleBackColor = $true
 #
 # tabHosts
 #
+$tabHosts.Controls.Add($btOpenShare)
 $tabHosts.Controls.Add($btExportCSVHosts)
 $tabHosts.Controls.Add($btDirectRDP)
 $tabHosts.Controls.Add($btRestartHost)
@@ -602,7 +631,7 @@ $lbabout.Location = New-Object System.Drawing.Point(34, 28)
 $lbabout.Name = "lbabout"
 $lbabout.Size = New-Object System.Drawing.Size(35, 13)
 $lbabout.TabIndex = 0
-$lbabout.Text = "By Tom Schoen`nVersion 0.3"
+$lbabout.Text = "By Tom Schoen`nVersion 0.4"
 
 #
 # lbSessionCount
@@ -613,6 +642,56 @@ $lbSessionCount.Name = "lbSessionCount"
 $lbSessionCount.Size = New-Object System.Drawing.Size(86, 13)
 $lbSessionCount.TabIndex = 6
 $lbSessionCount.Text = "Session count: 0"
+
+#
+# cmsOpenShare
+#
+$cmsOpenShare.Items.AddRange(@(
+$tsmiOpenShareC,
+$tsmiOpenFSLogixLogs))
+$cmsOpenShare.Name = "cmsOpenShare"
+$cmsOpenShare.RenderMode = [System.Windows.Forms.ToolStripRenderMode]::Professional
+$cmsOpenShare.Size = New-Object System.Drawing.Size(91, 26)
+
+#
+# tsmiOpenShareC
+#
+$tsmiOpenShareC.DropDownItems.AddRange(@(
+$tsmiOpenShareCUsers))
+$tsmiOpenShareC.Name = "tsmiOpenShareC"
+$tsmiOpenShareC.Size = New-Object System.Drawing.Size(90, 22)
+$tsmiOpenShareC.Text = "C:/"
+
+$tsmiOpenShareC.Add_Click({
+    $SessionHost = $dgvHosts.SelectedRows[0].Cells[0].Value
+    Start-Process "explorer.exe" -ArgumentList "\\$SessionHost\c$"
+})
+
+#
+# tsmiOpenShareCUsers
+#
+
+$tsmiOpenShareCUsers.Name = "tsmiOpenShareCUsers"
+$tsmiOpenShareCUsers.Size = New-Object System.Drawing.Size(180, 22)
+$tsmiOpenShareCUsers.Text = "Users"
+
+$tsmiOpenShareCUsers.Add_Click({
+    $SessionHost = $dgvHosts.SelectedRows[0].Cells[0].Value
+    Start-Process "explorer.exe" -ArgumentList "\\$SessionHost\c$\Users"
+})
+
+#
+# tsmiOpenFSLogixLogs
+#
+$tsmiOpenFSLogixLogs.Name = "tsmiOpenFSLogixLogs"
+$tsmiOpenFSLogixLogs.Size = New-Object System.Drawing.Size(140, 22)
+$tsmiOpenFSLogixLogs.Text = "FSLogix logs"
+
+$tsmiOpenFSLogixLogs.Add_Click({
+    $SessionHost = $dgvHosts.SelectedRows[0].Cells[0].Value
+    Start-Process "explorer.exe" -ArgumentList "\\$SessionHost\c$\ProgramData\FSLogix\Logs\"
+})
+
 
 #
 # Main
