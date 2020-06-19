@@ -4,8 +4,8 @@ This script will block the creation of Office 365 groups (and thus Teams) for al
 ## Requirements
 - Existing Security group on tenant (AAD or AD synced both work)
 - Global Administrator role on tenant
-- [AzureAD Powershell module](https://docs.microsoft.com/en-us/office365/enterprise/powershell/connect-to-office-365-powershell):
-  -  `Install-Module -Name AzureAD`
+- [AzureADPreview Powershell module](https://docs.microsoft.com/en-us/office365/enterprise/powershell/connect-to-office-365-powershell):
+  -  `Install-Module -Name AzureADPreview`
   
 ## Source
 Taken from [Microsoft documentation](https://docs.microsoft.com/en-us/microsoft-365/admin/create-groups/manage-creation-of-groups?view=o365-worldwide) and made minor adjustments.
