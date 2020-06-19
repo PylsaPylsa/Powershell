@@ -1,9 +1,9 @@
-﻿$DNSServer = "LV5-AZU-DC-01.levvel5.local"
-$ZoneName = "levvel5.local"
+﻿$DNSServer = "DC-01.contoso.local"
+$ZoneName = "contoso.local"
 
-$PrefixCNAME = "LV5-AZU-WVD-"
-$PrefixA = "LV5-AZU-WVD-"
-$ComputerOU = "OU=WVD,OU=Computers,OU=Levvel5,DC=levvel5,DC=local"
+$PrefixCNAME = "WVD-"
+$PrefixA = "WVD-"
+$ComputerOU = "OU=WVD,OU=Computers,DC=contoso,DC=local"
 
 # Do not edit below
 
@@ -55,7 +55,7 @@ For($i=0; $i -lt $NewHostsNumber; $i++){
 }
 
 Write-Host "`n[*] Cleaning up computer accounts" -ForegroundColor Green
-Get-ADComputer -Filter $ComputerFilter -SearchBase $ComputerOU | Where {$_.Name -notlike "$PrefixA$Iteration-*"} | %{ Write-Host "   [*] Removing obsolete computer account $($_.Name)" -ForegroundColor Green; Remove-ADObject -Identity $_ -Recursive -Confirm:$False }
+Get-ADComputer -Filter $ComputerFilter -SearchBase $ComputerOU | Where {$_.Name -notlike "$PrefixA$Iteration-*"} | %{ Write-Host "   [*] Removing obsolete computer account $($_.Name)" -ForegroundColor Green; Remove-ADComputer -Identity $_.Name -Confirm:$False }
 
 Write-Host "`nScript terminated at end of script. [Press Enter to exit]" -ForegroundColor Cyan
 Read-Host
