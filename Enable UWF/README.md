@@ -1,6 +1,6 @@
 # Set up UWF for Windows 10 Enterprise
 
-This PowerShell script will set up a base configuration of Microsoft Unified Write Filter (UWF) for you on Windows 10 Enterprise with the [recommended common exclusions](https://docs.microsoft.com/en-us/windows-hardware/customize/enterprise/uwfexclusions). It then also installs an edited version[^a] of some great tools developed by [Daniel Mushailov](https://github.com/dmushail) that add a status indicator to the systray as well as add a GUI element when double clicked to turn UWF on or off on demand.
+This PowerShell script will set up a base configuration of Microsoft Unified Write Filter (UWF) for you on Windows 10 Enterprise with the [recommended common exclusions](https://docs.microsoft.com/en-us/windows-hardware/customize/enterprise/uwfexclusions). It then also installs an edited version *(removed some user interaction on first run: Will always create configuration keys in registry; Will not ask to run on startup; Will set default password to "uwfadmin" instead of "admin")* of some great tools developed by [Daniel Mushailov](https://github.com/dmushail) that add a status indicator to the systray as well as add a GUI element when double clicked to turn UWF on or off on demand.
 
 Please note that this is a stub to help you get on your way. This is by no means a solution fitting for everyone and for each situation. Please consult the [official documentation](https://docs.microsoft.com/en-us/windows-hardware/customize/enterprise/unified-write-filter) first.
 
@@ -22,8 +22,3 @@ Please note that this is a stub to help you get on your way. This is by no means
 6. Installs [Daniel Mushailov](https://github.com/dmushail)'s UWF manager and UWF monitor.
 7. Enables UWF filter.
 8. Protects your C:\ drive.
-
-
-
-[^a]: Removed some user interaction on first run: Will always create configuration keys in registry; Will not ask to run on startup; Will set default password to "uwfadmin" instead of "admin".
-
