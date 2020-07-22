@@ -21,4 +21,4 @@ Please note that this is a stub to help you get on your way. This is by no means
 5. Disable hibernation.
 6. Installs [Daniel Mushailov](https://github.com/dmushail)'s UWF manager and UWF monitor.
 7. Enables UWF filter.
-8. Protects your C:\ drive.
+8. Protects your `C:\` drive.
