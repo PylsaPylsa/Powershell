@@ -110,7 +110,7 @@ if($False -eq $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]
             Write-Host "`n[*] Protecting volume C:" -ForegroundColor Green
             uwfmgr.exe volume protect c: | Out-Null
 
-            Write-Host "`n[!] UWF set up complete. Please reboot machine to enable protection. [Press Enter to exit]" -BackgroundColor Red
+            Write-Host "`n[!] UWF set up complete. Please reboot machine to enable protection. [Press Enter to exit]" -BackgroundColor Green
 			Read-Host
         }
     }
