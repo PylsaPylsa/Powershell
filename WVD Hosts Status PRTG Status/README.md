@@ -14,13 +14,6 @@ This PowerShell script can be used as  PRTG Advanced XML/EXE sensor and will rea
 
     
 
-## Performed actions
+## Setup
 
-1. Checks if prerequisites are satisified.
-2. Install UWF as optional windows feature if not yet installed.
-3. Set up common exclusions.
-4. Configure overlay settings. *You can specify custom settings at the top of the script.*
-5. Disable hibernation.
-6. Installs [Daniel Mushailov](https://github.com/dmushail)'s UWF manager and UWF monitor.
-7. Enables UWF filter.
-8. Protects your `C:\` drive.
+1. 

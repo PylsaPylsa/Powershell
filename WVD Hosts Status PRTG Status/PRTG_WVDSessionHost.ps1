@@ -12,9 +12,9 @@ if(!(Get-module Microsoft.RDInfra.RDPowerShell)){
     Import-Module -Name Microsoft.RDInfra.RDPowerShell | Out-Null
 }
 
-# Run the commented lines below to (re)create the credential object. Run this code as the same user you are 
-# saving the credentials for and on the computer you will be running this script from. The user must have
-# RDS Reader permissions on your Hostpool.
+# Run the commented lines below to (re)create the credential object. Run this code as the user you are 
+# running your PRTG service under and on the computer you will be running this script from. The user you are 
+# creating the credential for, must have RDS Reader permissions on your Hostpool.
 
 #$credential = Get-Credential -UserName $UserName -Message "Enter Credentials"
 #$credential.Password | ConvertFrom-SecureString | Out-File $CredFile
