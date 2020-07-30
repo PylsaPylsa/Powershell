@@ -12,8 +12,32 @@ This PowerShell script can be used as  PRTG Advanced XML/EXE sensor and will rea
     Install-Module -Name Microsoft.RDInfra.RDPowerShell
     ```
 
-    
+* An AD (service) account synced to AAD that has the *RDS Reader* role assigned on your WVD RDS tenant.
 
 ## Setup
 
-1. 
+1. Place the file in the PRTG program directory on the probe machine under `Custom Sensors\EXEXML`.
+
+2. Create the credential object for the AD (service) account that has the  *RDS Reader* role assigned by running the commands below. This is used to save the credentials safely. Run a PowerShell prompt under the same user context your PRTG service runs under.
+
+   1. ```powershell
+      [string]$CredFile = "cred.txt"
+      [string]$UserName = "srv-prtg-azure@contoso.local"
+      ```
+
+   2. ```powershell
+      $credential = Get-Credential -UserName $UserName -Message "Enter Credentials"
+      ```
+
+   3. ```powershell
+      $credential.Password | ConvertFrom-SecureString | Out-File $CredFile
+      ```
+
+3. In PRTG, create the sensor using the parameter below.
+
+   ```
+   -SessionHost LV5-AZU-WVD-12
+   ```
+
+   
+
