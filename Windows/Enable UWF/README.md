@@ -4,7 +4,7 @@ This PowerShell script will set up a base configuration of Microsoft Unified Wri
 
 Please note that this is a stub to help you get on your way. This is by no means a solution fitting for everyone and for each situation. Please consult the [official documentation](https://docs.microsoft.com/en-us/windows-hardware/customize/enterprise/unified-write-filter) first.
 
-![Screenshot](https://github.com/PylsaPylsa/Powershell/raw/master/Enable%20UWF/Screenshot.png)
+![Screenshot](https://github.com/PylsaPylsa/Powershell/raw/master/Windows/Enable%20UWF/Screenshot.png)
 
 ## Prerequisites
 
