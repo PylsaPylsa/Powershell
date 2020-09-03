@@ -6,13 +6,13 @@ $Username = $Null
 $LiftLockOut = $Null
 
 
-while($Null -eq $User){
+While($Null -eq $User){
     Write-Host '[?] Enter username of account to reset: ' -NoNewline -ForegroundColor "Cyan"
     $UserName = Read-Host
     $User = Get-ADUser -LDAPFilter "(sAMAccountName=$UserName)" -Properties DisplayName,SAMAccountname,LockedOut
 
     #Check if user exists in Active Directory. If not, loop and ask again.
-    if($Null -eq $User){ Write-Host '[!] User does not exist, check and enter username again.' -ForegroundColor "Yellow" }
+    If($Null -eq $User){ Write-Host '[!] User does not exist, check and enter username again.' -ForegroundColor "Yellow" }
 }
 
 If($User.LockedOut){ 
@@ -28,7 +28,7 @@ If($User.LockedOut){
 
 Write-Host "[*] Changing password for $($User.DisplayName)." -ForegroundColor "Green"
 
-while(!$($Password -cmatch '[A-Z]') -or !$($Password -cmatch '[a-z]') -or !$($Password -cmatch '[0-9]')){
+While(!$($Password -cmatch '[A-Z]') -or !$($Password -cmatch '[a-z]') -or !$($Password -cmatch '[0-9]')){
     $Password =  ([char[]]('A'[0]..'Z'[0]) + [char[]]('a'[0]..'z'[0]) + 0..9 | sort {Get-Random})[0..$Length] -join ''
 }
 
