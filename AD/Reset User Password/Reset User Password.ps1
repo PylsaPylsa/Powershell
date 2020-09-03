@@ -35,3 +35,6 @@ While(!$($Password -cmatch '[A-Z]') -or !$($Password -cmatch '[a-z]') -or !$($Pa
 Set-ADAccountPassword -Identity $User -NewPassword (ConvertTo-SecureString -AsPlainText $Password -Force) -Reset
 
 Write-Host "`n    Password set to: $Password" -ForegroundColor "Green"
+
+Write-Host "`nScript terminated at end of script. [Press Enter to exit]" -ForegroundColor Cyan
+Read-Host
