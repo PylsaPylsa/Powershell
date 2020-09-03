@@ -21,7 +21,7 @@ If($User.LockedOut){
     If($LiftLockOut -ne "N"){
         Unlock-ADAccount -Identity $User
         Write-Host "[*] Account has been unlocked" -ForegroundColor "Green"
-    }else{
+    }Else{
         Write-Host "[!] Leaving account locked" -ForegroundColor "Yellow"
     }
 }
