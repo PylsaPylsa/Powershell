@@ -2,7 +2,7 @@ $AllowGroupCreation = "False"
 
 Connect-AzureAD
 
-$GroupName = Read-Host -Prompt 'Naam Security Group'
+$GroupName = Read-Host -Prompt 'MGT_Azure_Allow_Teams_Creation'
 
 $settingsObjectID = (Get-AzureADDirectorySetting | Where-object -Property Displayname -Value "Group.Unified" -EQ).id
 if(!$settingsObjectID){
