@@ -713,13 +713,7 @@ $Main.Icon       = [System.Drawing.Icon]::FromHandle((New-Object System.Drawing.
 
 
 function OnFormClosing_Main{ 
-	# $this parameter is equal to the sender (object)
-	# $_ is equal to the parameter e (eventarg)
-
-	# The CloseReason property indicates a reason for the closure :
 	#   if (($_).CloseReason -eq [System.Windows.Forms.CloseReason]::UserClosing)
-
-	#Sets the value indicating that the event should be canceled.
 	($_).Cancel= $False
 }
 

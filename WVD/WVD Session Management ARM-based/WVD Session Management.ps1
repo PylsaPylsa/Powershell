@@ -4,10 +4,10 @@ Add-Type -AssemblyName System.Drawing | Out-Null
 Add-Type -AssemblyName Microsoft.VisualBasic | Out-Null
 
 $ResourceGroupName = $null
-$PresetResourceGroupName = (Get-ItemProperty -Path HKLM:\SOFTWARE\Pylsa).WVDResourceGroupName
+$Presets = (Get-ItemProperty -Path HKLM:\SOFTWARE\Pylsa)
 
-If($Null -ne $PresetResourceGroupName){
-    $ResourceGroupName = $PresetResourceGroupName
+If($Null -ne $Presets.WVDResourceGroupName){
+    $ResourceGroupName = $Presets.WVDResourceGroupName
 }else{
     $ResourceGroupName = [Microsoft.VisualBasic.Interaction]::InputBox("Enter Resource Group Name", "Resource Group Selection")
 }
@@ -16,7 +16,11 @@ if(!(Get-module Az.DesktopVirtualization)){
     Import-Module -Name Az.DesktopVirtualization | Out-Null
 }
 
-Connect-AzAccount
+If($Null -ne $Presets.TenantId){
+    Connect-AzAccount -Tenant $Presets.TenantId
+}else{
+    Connect-AzAccount
+}
 
 $strCurrentTimeZone = (Get-WmiObject win32_timezone).StandardName
 $objTimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
@@ -482,7 +486,7 @@ $btDrainOff.Enabled = $false
 $btDrainOff.Add_Click({
    $SessionHostDrainOff = $dgvHosts.SelectedRows[0].Cells[0].Value
    Update-AppStatus("Taking $SessionHostDrainOff out of drain")
-   Update-AzWvdSessionHost -ResourceGroupName $ResourceGroupName -HostPoolName $tvPools.SelectedNode.Text -Name $SessionHostDrainOn -AllowNewSession:$True
+   Update-AzWvdSessionHost -ResourceGroupName $ResourceGroupName -HostPoolName $tvPools.SelectedNode.Text -Name $SessionHostDrainOff -AllowNewSession:$True
 
    Update-AppStatus("Fetching hosts from $($tvPools.SelectedNode.Text)")
    Fill-SessionHosts($tvPools.SelectedNode.Text)
@@ -711,13 +715,7 @@ $Main.Icon       = [System.Drawing.Icon]::FromHandle((New-Object System.Drawing.
 
 
 function OnFormClosing_Main{ 
-	# $this parameter is equal to the sender (object)
-	# $_ is equal to the parameter e (eventarg)
-
-	# The CloseReason property indicates a reason for the closure :
 	#   if (($_).CloseReason -eq [System.Windows.Forms.CloseReason]::UserClosing)
-
-	#Sets the value indicating that the event should be canceled.
 	($_).Cancel= $False
 }
 
