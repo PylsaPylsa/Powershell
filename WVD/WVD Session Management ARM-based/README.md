@@ -10,6 +10,8 @@ This PowerShell script uses a form to provide a GUI to some of the AZ PowerShell
     Install-Module -Name Az.DesktopVirtualization
     ```
 
+- Some functionality will only work when there is a LAN connection to the hosts (like shadowing, opening administrative shares, direct RDP, etc.) while listing the sessions and hosts will work regardless of whether there is a LAN connection.
+
 ## Pre-configuration
 
 The script will ask for your Tenant ID and Resource group on start but you may save these to the registry to prevent it from asking each time:
@@ -20,7 +22,7 @@ The script will ask for your Tenant ID and Resource group on start but you may s
 "TenantId"=""
 ```
 
-If you want to get the remote shadowing part working, check out Robin Hobo's blog [here](https://www.robinhobo.com/how-to-shadow-an-active-user-session-in-windows-virtual-desktop-via-remote-desktop-connection-mstc/)! He has a great explanation
+If you want to get the remote shadowing part working, check out Robin Hobo's blog [here](https://www.robinhobo.com/how-to-shadow-an-active-user-session-in-windows-virtual-desktop-via-remote-desktop-connection-mstc/)! He has a great explanation of the steps needed to get it working.
 
 ## Screenshots
 
