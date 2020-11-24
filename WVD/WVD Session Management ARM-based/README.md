@@ -1,6 +1,6 @@
 # WVD Session Management tool (ARM version)
 
-This PowerShell script uses a form to provide a GUI to some of the AZ PowerShell modules for Windows Virtual Desktop Hostpools. It is not perfect by any stretch of the word and should be considered an messy, unoptimized Alpha release. The code comes as-is as a stub to get your own things working (that being said, it should work fine). I cannot provide support but will happily take any bug reports.
+This PowerShell script uses a form to provide a GUI to some of the AZ PowerShell modules for Windows Virtual Desktop Hostpools. It is not perfect by any stretch of the word and should be considered a messy, unoptimized Alpha release. The code comes as-is as a stub to get your own things working (that being said, it should work fine, I use it on a daily basis). I cannot provide support but will happily take any bug reports.
 
 ## Pre-requisites
 
