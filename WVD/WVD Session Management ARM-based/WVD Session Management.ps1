@@ -19,7 +19,8 @@ if(!(Get-module Az.DesktopVirtualization)){
 If($Null -ne $Presets.TenantId){
     Connect-AzAccount -Tenant $Presets.TenantId
 }else{
-    Connect-AzAccount
+    $TenantId = [Microsoft.VisualBasic.Interaction]::InputBox("EnterAzure Tenant ID", "Tenant Selection")
+    Connect-AzAccount-Tenant $TenantId
 }
 
 $strCurrentTimeZone = (Get-WmiObject win32_timezone).StandardName
