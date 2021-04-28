@@ -1,6 +1,6 @@
 $AllowGroupCreation = "False"
 
-Connect-AzureAD
+#Connect-AzureAD
 
 $GroupName = Read-Host -Prompt 'MGT_Azure_Allow_Teams_Creation'
 
